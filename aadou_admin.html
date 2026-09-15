@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AADOU — Administration</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --red: #C8102E;
+    --black: #0B0B0B;
+    --card: #151515;
+    --border: #2A2A2A;
+  }
+
+  body {
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    background: var(--black);
+    color: #FFFFFF;
+    padding: 0 0 60px;
+  }
+
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 22px clamp(20px, 5vw, 60px);
+    border-bottom: 1px solid var(--border);
+  }
+  .brand { font-size: 15px; font-weight: 700; letter-spacing: 0.14em; }
+  .brand .d { color: var(--red); }
+  .admin-tag { font-size: 11px; color: #8A8A8A; letter-spacing: 0.06em; text-transform: uppercase; }
+
+  main {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: clamp(24px, 4vw, 40px) clamp(20px, 5vw, 40px);
+  }
+
+  h1 { font-size: clamp(22px, 3vw, 30px); font-weight: 600; margin-bottom: 6px; }
+  .subtitle { color: #9A9A9A; font-size: 13.5px; margin-bottom: 32px; }
+
+  .panel {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 22px clamp(18px, 3vw, 26px);
+    margin-bottom: 24px;
+  }
+  .panel-title { font-size: 15px; font-weight: 600; margin-bottom: 4px; }
+  .panel-desc { font-size: 12.5px; color: #8A8A8A; margin-bottom: 18px; }
+
+  /* Toggle switch */
+  .switch-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 0;
+    border-bottom: 1px solid #212121;
+  }
+  .switch-row:last-child { border-bottom: none; }
+  .switch-label { font-size: 14px; }
+  .switch-sub { font-size: 11.5px; color: #7A7A7A; margin-top: 2px; }
+
+  .switch {
+    position: relative;
+    width: 46px;
+    height: 26px;
+    flex-shrink: 0;
+  }
+  .switch input { opacity: 0; width: 0; height: 0; }
+  .switch-slider {
+    position: absolute;
+    cursor: pointer;
+    inset: 0;
+    background: #333333;
+    border-radius: 26px;
+    transition: background 0.2s ease;
+  }
+  .switch-slider::before {
+    content: "";
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    left: 3px;
+    top: 3px;
+    background: #FFFFFF;
+    border-radius: 50%;
+    transition: transform 0.2s ease;
+  }
+  .switch input:checked + .switch-slider { background: var(--red); }
+  .switch input:checked + .switch-slider::before { transform: translateX(20px); }
+
+  .day-row {
+    display: grid;
+    grid-template-columns: 34px 1fr auto auto;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 0;
+    border-bottom: 1px solid #212121;
+  }
+  .day-row:last-child { border-bottom: none; }
+  .day-name { font-size: 14px; }
+  .day-time-input {
+    background: #0B0B0B;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    color: #FFFFFF;
+    font-size: 13px;
+    padding: 6px 8px;
+    width: 84px;
+  }
+  .day-time-input:disabled { opacity: 0.35; }
+  .day-sep { color: #6B6B6B; font-size: 12px; }
+  .day-times { display: flex; align-items: center; gap: 6px; }
+
+  .msg-input {
+    width: 100%;
+    background: #0B0B0B;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    color: #FFFFFF;
+    font-size: 13px;
+    padding: 10px 12px;
+    margin-top: 10px;
+  }
+
+  .actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 10px;
+    flex-wrap: wrap;
+  }
+  .btn {
+    font-size: 13px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    padding: 12px 24px;
+    border-radius: 4px;
+    cursor: pointer;
+    border: none;
+    font-family: inherit;
+  }
+  .btn-save { background: var(--red); color: #FFFFFF; }
+  .btn-reset { background: transparent; border: 1px solid var(--border); color: #B8B8B8; }
+  .btn-view { background: transparent; border: 1px solid #FFFFFF; color: #FFFFFF; text-decoration: none; display: inline-flex; align-items: center; }
+
+  .save-status {
+    margin-top: 14px;
+    font-size: 12.5px;
+    color: #4CAF6A;
+    display: none;
+  }
+  .save-status.show { display: block; }
+
+  .note {
+    font-size: 11px;
+    color: #6B6B6B;
+    line-height: 1.6;
+    margin-top: 30px;
+    border-top: 1px solid var(--border);
+    padding-top: 16px;
+  }
+
+  .product-category {
+    font-size: 11px;
+    color: var(--red);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin: 18px 0 6px;
+  }
+  .product-category:first-child { margin-top: 0; }
+  .product-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-bottom: 1px solid #212121;
+  }
+  .product-row:last-child { border-bottom: none; }
+  .product-name { font-size: 13.5px; }
+  .product-name.unavailable-label { color: #6B6B6B; text-decoration: line-through; }
+</style>
+</head>
+<body>
+
+<header>
+  <span class="brand">AA<span class="d">D</span>OU <span style="color:#6B6B6B; font-weight:400;">Admin</span></span>
+  <span class="admin-tag">Panneau propri&#233;taire</span>
+</header>
+
+<main>
+  <h1>G&#233;rer votre restaurant</h1>
+  <p class="subtitle">Ces r&#233;glages mettent &#224; jour automatiquement le site public (horaires et disponibilit&#233;), tant que vous utilisez le m&#234;me navigateur / ordinateur.</p>
+
+  <div class="panel">
+    <p class="panel-title">Disponibilit&#233; g&#233;n&#233;rale</p>
+    <p class="panel-desc">D&#233;sactivez temporairement le restaurant (vacances, imp&#233;vu, complet) sans toucher aux horaires habituels.</p>
+
+    <div class="switch-row">
+      <div>
+        <div class="switch-label">Restaurant actuellement disponible</div>
+        <div class="switch-sub">Si d&#233;sactiv&#233;, un message s'affiche en haut du site</div>
+      </div>
+      <label class="switch">
+        <input type="checkbox" id="availableToggle" checked>
+        <span class="switch-slider"></span>
+      </label>
+    </div>
+
+    <input type="text" id="availabilityMessage" class="msg-input" placeholder="Message affich&#233; si ferm&#233; (ex : Ferm&#233; pour cong&#233;s jusqu'au 20/09)">
+  </div>
+
+  <div class="panel">
+    <p class="panel-title">Horaires d'ouverture</p>
+    <p class="panel-desc">Activez ou d&#233;sactivez chaque jour, et modifiez les heures d'ouverture / fermeture.</p>
+
+    <div id="daysList"></div>
+  </div>
+
+  <div class="panel">
+    <p class="panel-title">Disponibilit&#233; des produits</p>
+    <p class="panel-desc">D&#233;sactivez un plat en rupture de stock : il appara&#238;tra comme indisponible sur le site, sans le supprimer de la carte.</p>
+
+    <div id="productsList"></div>
+  </div>
+
+  <div class="actions">
+    <button type="button" class="btn btn-save" id="saveBtn">Enregistrer</button>
+    <button type="button" class="btn btn-reset" id="resetBtn">R&#233;initialiser</button>
+    <a href="aadou_maquette_accueil.html" class="btn btn-view" target="_blank">Voir le site</a>
+  </div>
+
+  <p class="save-status" id="saveStatus">&#10003; Modifications enregistr&#233;es &mdash; le site public est &#224; jour.</p>
+
+  <p class="note">
+    &#9432; Cette interface sauvegarde les r&#233;glages dans le navigateur (stockage local), sans base de donn&#233;es ni serveur. Les modifications sont visibles sur le site tant qu'il est ouvert depuis le m&#234;me navigateur. Pour un acc&#232;s multi-appareils s&#233;curis&#233; (avec mot de passe), une vraie base de donn&#233;es et une authentification seraient n&#233;cessaires &mdash; c'est une &#233;volution possible du projet.
+  </p>
+</main>
+
+<script>
+(function() {
+  var ADMIN_KEY = 'aadou_admin_settings';
+
+  var DAY_LABELS = {
+    lundi: 'Lundi', mardi: 'Mardi', mercredi: 'Mercredi', jeudi: 'Jeudi',
+    vendredi: 'Vendredi', samedi: 'Samedi', dimanche: 'Dimanche'
+  };
+  var DAY_ORDER = ['lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi', 'dimanche'];
+
+  var PRODUCTS = [
+    { category: 'Nos entr\u00e9es', items: [
+      'Salade de chou croquante',
+      'Tempura de crevettes croustillantes',
+      'Gyozas au poulet grill\u00e9s (x4)'
+    ]},
+    { category: 'Nos plats signatures', items: [
+      'Ramen', 'Ph\u00f4', 'Pok\u00e9 bowl', 'Plateau S', 'Plateau M', 'Plateau L', 'Plateau V\u00e9g\u00e9'
+    ]},
+    { category: 'La touche sucr\u00e9e', items: [
+      'Mochi glac\u00e9', 'Cheesecake au Yuzu', 'Cheesecake au Matcha', 'Tiramisu au Matcha', 'Perles du Japon aux fruits de la passion'
+    ]}
+  ];
+
+  var DEFAULTS = {
+    available: true,
+    availabilityMessage: '',
+    hours: {
+      lundi:    { active: true,  open: '11:30', close: '14:30' },
+      mardi:    { active: true,  open: '11:30', close: '14:30' },
+      mercredi: { active: true,  open: '11:30', close: '14:30' },
+      jeudi:    { active: true,  open: '11:30', close: '14:30' },
+      vendredi: { active: true,  open: '11:30', close: '14:30' },
+      samedi:   { active: false, open: '11:30', close: '14:30' },
+      dimanche: { active: false, open: '11:30', close: '14:30' }
+    },
+    products: {}
+  };
+  PRODUCTS.forEach(function(cat) {
+    cat.items.forEach(function(name) { DEFAULTS.products[name] = true; });
+  });
+
+  var daysList = document.getElementById('daysList');
+  var productsList = document.getElementById('productsList');
+  var availableToggle = document.getElementById('availableToggle');
+  var availabilityMessage = document.getElementById('availabilityMessage');
+  var saveBtn = document.getElementById('saveBtn');
+  var resetBtn = document.getElementById('resetBtn');
+  var saveStatus = document.getElementById('saveStatus');
+
+  function loadSettings() {
+    var raw = localStorage.getItem(ADMIN_KEY);
+    if (!raw) return JSON.parse(JSON.stringify(DEFAULTS));
+    try {
+      var parsed = JSON.parse(raw);
+      // fusion avec les d\u00e9fauts pour \u00e9viter les cl\u00e9s manquantes
+      var merged = JSON.parse(JSON.stringify(DEFAULTS));
+      merged.available = (typeof parsed.available === 'boolean') ? parsed.available : merged.available;
+      merged.availabilityMessage = parsed.availabilityMessage || '';
+      if (parsed.hours) {
+        DAY_ORDER.forEach(function(day) {
+          if (parsed.hours[day]) merged.hours[day] = parsed.hours[day];
+        });
+      }
+      if (parsed.products) {
+        Object.keys(merged.products).forEach(function(name) {
+          if (typeof parsed.products[name] === 'boolean') {
+            merged.products[name] = parsed.products[name];
+          }
+        });
+      }
+      return merged;
+    } catch (e) {
+      return JSON.parse(JSON.stringify(DEFAULTS));
+    }
+  }
+
+  function renderDays(settings) {
+    daysList.innerHTML = '';
+    DAY_ORDER.forEach(function(day) {
+      var d = settings.hours[day];
+      var row = document.createElement('div');
+      row.className = 'day-row';
+      row.setAttribute('data-day', day);
+
+      var switchWrap = document.createElement('label');
+      switchWrap.className = 'switch';
+      switchWrap.style.width = '40px';
+      switchWrap.style.height = '22px';
+      switchWrap.innerHTML =
+        '<input type="checkbox" class="day-active-input" ' + (d.active ? 'checked' : '') + '>' +
+        '<span class="switch-slider"></span>';
+
+      var nameEl = document.createElement('div');
+      nameEl.className = 'day-name';
+      nameEl.textContent = DAY_LABELS[day];
+
+      var openInput = document.createElement('input');
+      openInput.type = 'time';
+      openInput.className = 'day-time-input day-open-input';
+      openInput.value = d.open;
+      openInput.disabled = !d.active;
+
+      var closeInput = document.createElement('input');
+      closeInput.type = 'time';
+      closeInput.className = 'day-time-input day-close-input';
+      closeInput.value = d.close;
+      closeInput.disabled = !d.active;
+
+      var timesWrap = document.createElement('div');
+      timesWrap.className = 'day-times';
+      var sep = document.createElement('span');
+      sep.className = 'day-sep';
+      sep.textContent = '\u2013';
+      timesWrap.appendChild(openInput);
+      timesWrap.appendChild(sep);
+      timesWrap.appendChild(closeInput);
+
+      row.appendChild(switchWrap);
+      row.appendChild(nameEl);
+      row.appendChild(timesWrap);
+      row.appendChild(document.createElement('span'));
+
+      daysList.appendChild(row);
+
+      var activeInput = switchWrap.querySelector('.day-active-input');
+      activeInput.addEventListener('change', function() {
+        openInput.disabled = !activeInput.checked;
+        closeInput.disabled = !activeInput.checked;
+      });
+    });
+  }
+
+  function renderProducts(settings) {
+    productsList.innerHTML = '';
+    PRODUCTS.forEach(function(cat) {
+      var catTitle = document.createElement('p');
+      catTitle.className = 'product-category';
+      catTitle.textContent = cat.category;
+      productsList.appendChild(catTitle);
+
+      cat.items.forEach(function(name) {
+        var isAvailable = settings.products[name] !== false;
+
+        var row = document.createElement('div');
+        row.className = 'product-row';
+        row.setAttribute('data-product', name);
+
+        var nameEl = document.createElement('span');
+        nameEl.className = 'product-name' + (isAvailable ? '' : ' unavailable-label');
+        nameEl.textContent = name;
+
+        var switchWrap = document.createElement('label');
+        switchWrap.className = 'switch';
+        switchWrap.style.width = '40px';
+        switchWrap.style.height = '22px';
+        switchWrap.innerHTML =
+          '<input type="checkbox" class="product-active-input" ' + (isAvailable ? 'checked' : '') + '>' +
+          '<span class="switch-slider"></span>';
+
+        var activeInput = switchWrap.querySelector('.product-active-input');
+        activeInput.addEventListener('change', function() {
+          nameEl.classList.toggle('unavailable-label', !activeInput.checked);
+        });
+
+        row.appendChild(nameEl);
+        row.appendChild(switchWrap);
+        productsList.appendChild(row);
+      });
+    });
+  }
+
+  function collectSettings() {
+    var settings = {
+      available: availableToggle.checked,
+      availabilityMessage: availabilityMessage.value.trim(),
+      hours: {},
+      products: {}
+    };
+    DAY_ORDER.forEach(function(day) {
+      var row = daysList.querySelector('.day-row[data-day="' + day + '"]');
+      settings.hours[day] = {
+        active: row.querySelector('.day-active-input').checked,
+        open: row.querySelector('.day-open-input').value,
+        close: row.querySelector('.day-close-input').value
+      };
+    });
+    Object.keys(DEFAULTS.products).forEach(function(name) {
+      var row = productsList.querySelector('.product-row[data-product="' + name + '"]');
+      settings.products[name] = row.querySelector('.product-active-input').checked;
+    });
+    return settings;
+  }
+
+  function init() {
+    var settings = loadSettings();
+    availableToggle.checked = settings.available;
+    availabilityMessage.value = settings.availabilityMessage;
+    renderDays(settings);
+    renderProducts(settings);
+  }
+
+  saveBtn.addEventListener('click', function() {
+    var settings = collectSettings();
+    localStorage.setItem(ADMIN_KEY, JSON.stringify(settings));
+    saveStatus.classList.add('show');
+    setTimeout(function() { saveStatus.classList.remove('show'); }, 3000);
+  });
+
+  resetBtn.addEventListener('click', function() {
+    if (!confirm('R\u00e9initialiser tous les r\u00e9glages aux valeurs par d\u00e9faut ?')) return;
+    localStorage.removeItem(ADMIN_KEY);
+    init();
+  });
+
+  init();
+})();
+</script>
+
+</body>
+</html>
