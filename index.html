@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>AADOU — Administration</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  :root {
+    --red: #C8102E;
+    --black: #0B0B0B;
+    --card: #151515;
+    --border: #2A2A2A;
+    --gray: #8A8A8A;
+    --green: #2E9E5B;
+    --font-body: 'Inter', 'Helvetica Neue', Arial, sans-serif;
+    --font-display: 'Space Grotesk', 'Helvetica Neue', Arial, sans-serif;
+  }
+  body {
+    background: var(--black);
+    color: #FFFFFF;
+    font-family: var(--font-body);
+    min-height: 100vh;
+    padding-bottom: 60px;
+  }
+  a:focus-visible, button:focus-visible, input:focus-visible {
+    outline: 2px solid var(--red);
+    outline-offset: 2px;
+  }
+
+  /* ===== ÉCRAN DE CONNEXION ===== */
+  #loginScreen {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+  .login-box { width: 100%; max-width: 360px; text-align: center; }
+  .login-box h1 { font-family: var(--font-display); font-size: 22px; margin-bottom: 6px; }
+  .login-box p { color: var(--gray); font-size: 13px; margin-bottom: 24px; }
+  .login-box input {
+    width: 100%;
+    background: var(--card);
+    border: 1px solid var(--border);
+    color: #FFFFFF;
+    padding: 13px 14px;
+    font-size: 15px;
+    border-radius: 4px;
+    margin-bottom: 12px;
+    font-family: var(--font-body);
+  }
+  .login-box button {
+    width: 100%;
+    background: var(--red);
+    color: #FFFFFF;
+    border: none;
+    padding: 13px;
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  .login-error { color: var(--red); font-size: 13px; margin-top: 10px; display: none; }
+
+  /* ===== TABLEAU DE BORD ===== */
+  #dashboard { display: none; }
+  header.top {
+    position: sticky;
+    top: 0;
+    background: var(--black);
+    border-bottom: 1px solid var(--border);
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    z-index: 10;
+  }
+  header.top h1 { font-family: var(--font-display); font-size: 17px; }
+  .logout-btn {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--gray);
+    font-size: 12px;
+    padding: 7px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  .logout-btn:hover { border-color: var(--gray); color: #FFFFFF; }
+
+  main { max-width: 720px; margin: 0 auto; padding: 20px; }
+
+  .panel {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 20px clamp(18px, 3vw, 26px);
+    margin-bottom: 20px;
+  }
+  .panel h2 {
+    font-family: var(--font-display);
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--gray);
+    margin-bottom: 4px;
+  }
+  .panel-desc { font-size: 12.5px; color: var(--gray); margin-bottom: 16px; }
+
+  .switch-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 10px 0;
+    border-bottom: 1px solid #212121;
+  }
+  .switch-row:last-child { border-bottom: none; }
+  .switch-label { font-size: 14.5px; font-weight: 500; }
+  .switch-sub { font-size: 12px; color: var(--gray); margin-top: 2px; }
+  .switch { position: relative; width: 44px; height: 25px; flex-shrink: 0; }
+  .switch.small { width: 38px; height: 22px; }
+  .switch input { opacity: 0; width: 0; height: 0; }
+  .switch-track {
+    position: absolute; inset: 0;
+    background: var(--border);
+    border-radius: 13px;
+    cursor: pointer;
+    transition: background 0.2s ease;
+  }
+  .switch-track::before {
+    content: "";
+    position: absolute;
+    width: 19px; height: 19px;
+    left: 3px; top: 3px;
+    background: #FFFFFF;
+    border-radius: 50%;
+    transition: transform 0.2s ease;
+  }
+  .switch.small .switch-track::before { width: 16px; height: 16px; }
+  .switch input:checked + .switch-track { background: var(--green); }
+  .switch input:checked + .switch-track::before { transform: translateX(19px); }
+  .switch.small input:checked + .switch-track::before { transform: translateX(16px); }
+
+  .msg-input, .text-input {
+    width: 100%;
+    background: var(--black);
+    border: 1px solid var(--border);
+    color: #FFFFFF;
+    padding: 10px 12px;
+    font-size: 13px;
+    border-radius: 4px;
+    margin-top: 12px;
+    font-family: var(--font-body);
+  }
+
+  .day-row {
+    display: grid;
+    grid-template-columns: 40px 1fr auto;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 0;
+    border-bottom: 1px solid #212121;
+  }
+  .day-row:last-child { border-bottom: none; }
+  .day-name { font-size: 13.5px; }
+  .day-times { display: flex; align-items: center; gap: 6px; justify-self: end; }
+  .day-time-input {
+    background: var(--black);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    color: #FFFFFF;
+    font-size: 12.5px;
+    padding: 6px 7px;
+    width: 84px;
+    font-family: var(--font-body);
+  }
+  .day-time-input:disabled { opacity: 0.35; }
+  .day-sep { color: var(--gray); font-size: 12px; }
+
+  .product-category {
+    font-size: 11px;
+    color: var(--red);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin: 16px 0 6px;
+  }
+  .product-category:first-child { margin-top: 0; }
+  .product-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 9px 0;
+    border-bottom: 1px solid #212121;
+  }
+  .product-row:last-child { border-bottom: none; }
+  .product-name { font-size: 13px; }
+  .product-name.unavailable-label { color: var(--gray); text-decoration: line-through; }
+
+  .save-btn {
+    margin-top: 14px;
+    background: var(--red);
+    color: #FFFFFF;
+    border: none;
+    padding: 10px 18px;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  .save-note {
+    font-size: 12px;
+    color: var(--green);
+    margin-top: 8px;
+    display: none;
+  }
+
+  .orders-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; }
+  .orders-count {
+    background: var(--red);
+    color: #FFFFFF;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 10px;
+  }
+  .refresh-btn {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--gray);
+    font-size: 11px;
+    padding: 5px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  .refresh-btn:hover { border-color: var(--gray); color: #FFFFFF; }
+
+  .order-card { border: 1px solid var(--border); border-radius: 6px; padding: 14px 16px; margin-top: 12px; }
+  .order-card.is-new { border-color: var(--red); animation: orderPulse 1.4s ease 2; }
+  @keyframes orderPulse { 0%, 100% { background: var(--card); } 50% { background: rgba(200,16,46,0.12); } }
+  .order-top { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 8px; }
+  .order-number { font-family: var(--font-display); font-size: 16px; }
+  .order-time { font-size: 11px; color: var(--gray); }
+  .order-client { font-size: 13px; color: #B8B8B8; margin-bottom: 8px; }
+  .order-client a { color: inherit; }
+  .order-items { font-size: 13px; margin-bottom: 10px; }
+  .order-items div { display: flex; justify-content: space-between; padding: 2px 0; }
+  .order-total {
+    font-size: 13px;
+    font-weight: 600;
+    border-top: 1px solid var(--border);
+    padding-top: 8px;
+    display: flex;
+    justify-content: space-between;
+  }
+  .order-note { font-size: 12px; color: var(--gray); font-style: italic; margin-top: 6px; }
+  .order-done-btn {
+    width: 100%;
+    margin-top: 12px;
+    background: transparent;
+    border: 1px solid var(--green);
+    color: var(--green);
+    padding: 9px;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  .order-done-btn:hover { background: var(--green); color: #FFFFFF; }
+  .empty-note { color: var(--gray); font-size: 13px; padding: 20px 0; text-align: center; }
+</style>
+</head>
+<body>
+
+<div id="loginScreen">
+  <div class="login-box">
+    <h1>Administration AADOU</h1>
+    <p>Acc&#232;s r&#233;serv&#233; &#224; l'&#233;quipe.</p>
+    <input type="password" id="adminKeyInput" placeholder="Cl&#233; d'acc&#232;s" autocomplete="off">
+    <button type="button" id="loginBtn">Entrer</button>
+    <p class="login-error" id="loginError">Cl&#233; incorrecte.</p>
+  </div>
+</div>
+
+<div id="dashboard">
+  <header class="top">
+    <h1>AADOU &mdash; Administration</h1>
+    <button type="button" class="logout-btn" id="logoutBtn">D&#233;connexion</button>
+  </header>
+  <main>
+
+    <div class="panel">
+      <h2>Disponibilit&#233; g&#233;n&#233;rale</h2>
+      <p class="panel-desc">D&#233;sactivez temporairement le restaurant (vacances, impr&#233;vu, complet) &mdash; ça bloque aussi les commandes en ligne.</p>
+      <div class="switch-row">
+        <div>
+          <p class="switch-label" id="availableLabel">Restaurant ouvert</p>
+          <p class="switch-sub">Si d&#233;sactiv&#233;, un message s'affiche en haut du site pour tous les visiteurs</p>
+        </div>
+        <label class="switch">
+          <input type="checkbox" id="availableToggle" checked>
+          <span class="switch-track"></span>
+        </label>
+      </div>
+      <input type="text" class="msg-input" id="availabilityMessage" placeholder="Message affich&#233; si ferm&#233; (ex : Ferm&#233; pour cong&#233;s jusqu'au 20/09)">
+    </div>
+
+    <div class="panel">
+      <h2>Horaires d'ouverture</h2>
+      <p class="panel-desc">Activez ou d&#233;sactivez chaque jour, modifiez les heures.</p>
+      <div id="daysList"></div>
+    </div>
+
+    <div class="panel">
+      <h2>Disponibilit&#233; des produits</h2>
+      <p class="panel-desc">D&#233;sactivez un plat en rupture&nbsp;: il appara&#238;t indisponible sur le site sans &#234;tre retir&#233; de la carte.</p>
+      <div id="productsList"></div>
+    </div>
+
+    <div class="panel">
+      <button type="button" class="save-btn" id="saveSettingsBtn" disabled>Enregistrer disponibilit&#233;, horaires &amp; produits</button>
+      <p class="save-note" id="saveSettingsNote">Enregistr&#233; &mdash; visible imm&#233;diatement sur le site.</p>
+    </div>
+
+    <div class="panel">
+      <h2>Commande en ligne</h2>
+      <p class="panel-desc">Ind&#233;pendant de la disponibilit&#233; g&#233;n&#233;rale &mdash; utile si le restaurant reste ouvert mais que vous voulez suspendre les commandes en ligne.</p>
+      <div class="switch-row">
+        <div>
+          <p class="switch-label" id="onlineLabel">Activ&#233;e</p>
+          <p class="switch-sub">D&#233;sactive la r&#233;ception de nouvelles commandes sur le site</p>
+        </div>
+        <label class="switch">
+          <input type="checkbox" id="onlineToggle" checked>
+          <span class="switch-track"></span>
+        </label>
+      </div>
+      <input type="text" class="msg-input" id="onlineMessage" placeholder="Message affich&#233; aux clients (optionnel)">
+      <button type="button" class="save-btn" id="saveOnlineBtn">Enregistrer</button>
+      <p class="save-note" id="saveOnlineNote">Enregistr&#233;.</p>
+    </div>
+
+    <div class="panel">
+      <div class="orders-header">
+        <h2 style="margin-bottom:0;">Commandes en attente</h2>
+        <div style="display:flex; align-items:center; gap:8px;">
+          <span class="orders-count" id="ordersCount">0</span>
+          <button type="button" class="refresh-btn" id="refreshBtn">Actualiser</button>
+        </div>
+      </div>
+      <div id="ordersList"></div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+(function () {
+  var STORAGE_KEY = 'aadou_admin_key';
+  var POLL_MS = 10000;
+
+  var DAY_LABELS = { lundi: 'Lundi', mardi: 'Mardi', mercredi: 'Mercredi', jeudi: 'Jeudi', vendredi: 'Vendredi', samedi: 'Samedi', dimanche: 'Dimanche' };
+  var DAY_ORDER = ['lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi', 'dimanche'];
+  var PRODUCTS = [
+    { category: 'Nos entr\u00e9es', items: ['Salade de chou croquante', 'Tempura de crevettes croustillantes', 'Gyozas au poulet grill\u00e9s (x4)'] },
+    { category: 'Nos plats signatures', items: ['Ramen', 'Ph\u00f4', 'Pok\u00e9 bowl', 'Plateau S', 'Plateau M', 'Plateau L', 'Plateau V\u00e9g\u00e9'] },
+    { category: 'La touche sucr\u00e9e', items: ['Mochi glac\u00e9', 'Cheesecake au Yuzu', 'Cheesecake au Matcha', 'Tiramisu au Matcha', 'Perles du Japon aux fruits de la passion'] },
+  ];
+
+  var loginScreen = document.getElementById('loginScreen');
+  var dashboard = document.getElementById('dashboard');
+  var adminKeyInput = document.getElementById('adminKeyInput');
+  var loginBtn = document.getElementById('loginBtn');
+  var loginError = document.getElementById('loginError');
+  var logoutBtn = document.getElementById('logoutBtn');
+
+  var availableToggle = document.getElementById('availableToggle');
+  var availableLabel = document.getElementById('availableLabel');
+  var availabilityMessage = document.getElementById('availabilityMessage');
+  var daysList = document.getElementById('daysList');
+  var productsList = document.getElementById('productsList');
+  var saveSettingsBtn = document.getElementById('saveSettingsBtn');
+  var saveSettingsNote = document.getElementById('saveSettingsNote');
+
+  var onlineToggle = document.getElementById('onlineToggle');
+  var onlineLabel = document.getElementById('onlineLabel');
+  var onlineMessage = document.getElementById('onlineMessage');
+  var saveOnlineBtn = document.getElementById('saveOnlineBtn');
+  var saveOnlineNote = document.getElementById('saveOnlineNote');
+
+  var ordersList = document.getElementById('ordersList');
+  var ordersCount = document.getElementById('ordersCount');
+  var refreshBtn = document.getElementById('refreshBtn');
+
+  var pollTimer = null;
+  var knownIds = [];
+
+  function adminKey() { return localStorage.getItem(STORAGE_KEY) || ''; }
+  function formatPrice(v) { return v.toFixed(2).replace('.', ',') + '\u2009\u20ac'; }
+  function formatTime(ts) { return new Date(ts).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }); }
+
+  function showDashboard() {
+    loginScreen.style.display = 'none';
+    dashboard.style.display = 'block';
+    loadSettings();
+    loadOnlineStatus();
+    loadOrders();
+    if (pollTimer) clearInterval(pollTimer);
+    pollTimer = setInterval(loadOrders, POLL_MS);
+  }
+  function showLogin(errorMsg) {
+    localStorage.removeItem(STORAGE_KEY);
+    dashboard.style.display = 'none';
+    loginScreen.style.display = 'flex';
+    if (pollTimer) clearInterval(pollTimer);
+    if (errorMsg) loginError.style.display = 'block';
+  }
+
+  function tryLogin(key) {
+    fetch('/api/orders', { headers: { 'x-admin-key': key } })
+      .then(function (r) {
+        if (r.status === 401) { showLogin(true); return; }
+        localStorage.setItem(STORAGE_KEY, key);
+        loginError.style.display = 'none';
+        showDashboard();
+      })
+      .catch(function () { loginError.textContent = 'Connexion impossible. R\u00e9essaie.'; loginError.style.display = 'block'; });
+  }
+
+  loginBtn.addEventListener('click', function () {
+    var key = adminKeyInput.value.trim();
+    if (key) tryLogin(key);
+  });
+  adminKeyInput.addEventListener('keydown', function (e) { if (e.key === 'Enter') loginBtn.click(); });
+  logoutBtn.addEventListener('click', function () { showLogin(false); });
+
+  // ---- Disponibilit\u00e9 g\u00e9n\u00e9rale + horaires + produits ----
+  function renderDays(settings) {
+    daysList.innerHTML = '';
+    DAY_ORDER.forEach(function (day) {
+      var d = (settings.hours && settings.hours[day]) || { active: true, open: '11:30', close: '14:30' };
+      var row = document.createElement('div');
+      row.className = 'day-row';
+      row.setAttribute('data-day', day);
+
+      var switchWrap = document.createElement('label');
+      switchWrap.className = 'switch small';
+      switchWrap.innerHTML = '<input type="checkbox" class="day-active-input" ' + (d.active ? 'checked' : '') + '><span class="switch-track"></span>';
+
+      var nameEl = document.createElement('div');
+      nameEl.className = 'day-name';
+      nameEl.textContent = DAY_LABELS[day];
+
+      var openInput = document.createElement('input');
+      openInput.type = 'time';
+      openInput.className = 'day-time-input day-open-input';
+      openInput.value = d.open;
+      openInput.disabled = !d.active;
+
+      var closeInput = document.createElement('input');
+      closeInput.type = 'time';
+      closeInput.className = 'day-time-input day-close-input';
+      closeInput.value = d.close;
+      closeInput.disabled = !d.active;
+
+      var timesWrap = document.createElement('div');
+      timesWrap.className = 'day-times';
+      var sep = document.createElement('span');
+      sep.className = 'day-sep';
+      sep.textContent = '\u2013';
+      timesWrap.appendChild(openInput);
+      timesWrap.appendChild(sep);
+      timesWrap.appendChild(closeInput);
+
+      row.appendChild(switchWrap);
+      row.appendChild(nameEl);
+      row.appendChild(timesWrap);
+      daysList.appendChild(row);
+
+      switchWrap.querySelector('.day-active-input').addEventListener('change', function () {
+        openInput.disabled = !this.checked;
+        closeInput.disabled = !this.checked;
+      });
+    });
+  }
+
+  function renderProducts(settings) {
+    productsList.innerHTML = '';
+    PRODUCTS.forEach(function (cat) {
+      var catTitle = document.createElement('p');
+      catTitle.className = 'product-category';
+      catTitle.textContent = cat.category;
+      productsList.appendChild(catTitle);
+
+      cat.items.forEach(function (name) {
+        var isAvailable = !settings.products || settings.products[name] !== false;
+        var row = document.createElement('div');
+        row.className = 'product-row';
+        row.setAttribute('data-product', name);
+
+        var nameEl = document.createElement('span');
+        nameEl.className = 'product-name' + (isAvailable ? '' : ' unavailable-label');
+        nameEl.textContent = name;
+
+        var switchWrap = document.createElement('label');
+        switchWrap.className = 'switch small';
+        switchWrap.innerHTML = '<input type="checkbox" class="product-active-input" ' + (isAvailable ? 'checked' : '') + '><span class="switch-track"></span>';
+
+        switchWrap.querySelector('.product-active-input').addEventListener('change', function () {
+          nameEl.classList.toggle('unavailable-label', !this.checked);
+        });
+
+        row.appendChild(nameEl);
+        row.appendChild(switchWrap);
+        productsList.appendChild(row);
+      });
+    });
+  }
+
+  function loadSettings() {
+    saveSettingsBtn.disabled = true;
+    fetch('/api/settings')
+      .then(function (r) { if (!r.ok) throw new Error('http ' + r.status); return r.json(); })
+      .then(function (data) {
+        availableToggle.checked = data.available !== false;
+        availableLabel.textContent = availableToggle.checked ? 'Restaurant ouvert' : 'Restaurant ferm\u00e9';
+        availabilityMessage.value = data.availabilityMessage || '';
+        renderDays(data);
+        renderProducts(data);
+        saveSettingsBtn.disabled = false;
+      })
+      .catch(function () {
+        daysList.innerHTML = '<p class="empty-note">Chargement impossible. V\u00e9rifie que /api/settings est bien d\u00e9ploy\u00e9, puis recharge la page.</p>';
+        productsList.innerHTML = '';
+      });
+  }
+  availableToggle.addEventListener('change', function () {
+    availableLabel.textContent = this.checked ? 'Restaurant ouvert' : 'Restaurant ferm\u00e9';
+  });
+
+  saveSettingsBtn.addEventListener('click', function () {
+    var hours = {};
+    DAY_ORDER.forEach(function (day) {
+      var row = daysList.querySelector('.day-row[data-day="' + day + '"]');
+      if (!row) return;
+      hours[day] = {
+        active: row.querySelector('.day-active-input').checked,
+        open: row.querySelector('.day-open-input').value,
+        close: row.querySelector('.day-close-input').value,
+      };
+    });
+    var products = {};
+    PRODUCTS.forEach(function (cat) {
+      cat.items.forEach(function (name) {
+        var row = productsList.querySelector('.product-row[data-product="' + name.replace(/"/g, '\\"') + '"]');
+        if (!row) return;
+        products[name] = row.querySelector('.product-active-input').checked;
+      });
+    });
+    if (Object.keys(hours).length === 0 && Object.keys(products).length === 0) {
+      saveSettingsNote.textContent = 'Rien \u00e0 enregistrer, recharge la page.';
+      saveSettingsNote.style.color = '#C8102E';
+      saveSettingsNote.style.display = 'block';
+      return;
+    }
+    var payload = {
+      available: availableToggle.checked,
+      availabilityMessage: availabilityMessage.value.trim(),
+      hours: hours,
+      products: products,
+    };
+    fetch('/api/settings', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-admin-key': adminKey() },
+      body: JSON.stringify(payload),
+    })
+      .then(function (r) {
+        if (r.status === 401) { showLogin(true); return; }
+        saveSettingsNote.textContent = 'Enregistr\u00e9 \u2014 visible imm\u00e9diatement sur le site.';
+        saveSettingsNote.style.color = '';
+        saveSettingsNote.style.display = 'block';
+        setTimeout(function () { saveSettingsNote.style.display = 'none'; }, 2500);
+      })
+      .catch(function () {});
+  });
+
+  // ---- Commande en ligne ----
+  function loadOnlineStatus() {
+    fetch('/api/status')
+      .then(function (r) { return r.json(); })
+      .then(function (data) {
+        onlineToggle.checked = data.enabled !== false;
+        onlineLabel.textContent = onlineToggle.checked ? 'Activ\u00e9e' : 'D\u00e9sactiv\u00e9e';
+        onlineMessage.value = data.message || '';
+      })
+      .catch(function () {});
+  }
+  onlineToggle.addEventListener('change', function () {
+    onlineLabel.textContent = this.checked ? 'Activ\u00e9e' : 'D\u00e9sactiv\u00e9e';
+  });
+  saveOnlineBtn.addEventListener('click', function () {
+    fetch('/api/status', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-admin-key': adminKey() },
+      body: JSON.stringify({ enabled: onlineToggle.checked, message: onlineMessage.value.trim() }),
+    })
+      .then(function (r) {
+        if (r.status === 401) { showLogin(true); return; }
+        saveOnlineNote.style.display = 'block';
+        setTimeout(function () { saveOnlineNote.style.display = 'none'; }, 2000);
+      })
+      .catch(function () {});
+  });
+
+  // ---- Commandes en direct ----
+  function renderOrders(orders) {
+    ordersCount.textContent = orders.length;
+    if (orders.length === 0) {
+      ordersList.innerHTML = '<p class="empty-note">Aucune commande en attente.</p>';
+      knownIds = [];
+      return;
+    }
+    var html = '';
+    orders.forEach(function (o) {
+      var isNew = knownIds.length > 0 && knownIds.indexOf(o.id) === -1;
+      html += '<div class="order-card' + (isNew ? ' is-new' : '') + '" data-id="' + o.id + '">' +
+        '<div class="order-top"><span class="order-number">Commande #' + o.number + '</span>' +
+        '<span class="order-time">' + formatTime(o.createdAt) + '</span></div>' +
+        '<p class="order-client">' + o.name + ' &middot; <a href="tel:' + o.phone.replace(/\s/g, '') + '">' + o.phone + '</a></p>' +
+        '<div class="order-items">' +
+        o.items.map(function (it) { return '<div><span>' + it.qty + ' &times; ' + it.name + '</span><span>' + formatPrice(it.price * it.qty) + '</span></div>'; }).join('') +
+        '</div>' +
+        '<div class="order-total"><span>Total</span><span>' + formatPrice(o.total) + '</span></div>' +
+        (o.note ? '<p class="order-note">' + o.note + '</p>' : '') +
+        '<button type="button" class="order-done-btn" data-id="' + o.id + '">Marquer comme trait\u00e9e</button>' +
+        '</div>';
+    });
+    ordersList.innerHTML = html;
+    knownIds = orders.map(function (o) { return o.id; });
+  }
+  function loadOrders() {
+    fetch('/api/orders', { headers: { 'x-admin-key': adminKey() } })
+      .then(function (r) { if (r.status === 401) { showLogin(true); return null; } return r.json(); })
+      .then(function (data) { if (data) renderOrders(data.orders || []); })
+      .catch(function () {});
+  }
+  refreshBtn.addEventListener('click', loadOrders);
+  ordersList.addEventListener('click', function (e) {
+    var btn = e.target.closest('.order-done-btn');
+    if (!btn) return;
+    var id = btn.getAttribute('data-id');
+    btn.disabled = true;
+    btn.textContent = 'Trait\u00e9e...';
+    fetch('/api/orders?id=' + encodeURIComponent(id), { method: 'DELETE', headers: { 'x-admin-key': adminKey() } })
+      .then(function () { loadOrders(); })
+      .catch(function () { btn.disabled = false; btn.textContent = 'Marquer comme trait\u00e9e'; });
+  });
+
+  var saved = adminKey();
+  if (saved) { tryLogin(saved); } else { showLogin(false); }
+})();
+</script>
+</body>
+</html>
